@@ -44,7 +44,11 @@ def read_item(item_id: str, db: sqlite3.Connection = Depends(get_db)):
 
 @app.get("/sort")
 def sort_patients(
-    column: str = Query(..., description="sort on the basis of height weight or bmi"),order: Optional[str] = Query("asc", description="default is asc mention desc otherwise"),db: sqlite3.Connection = Depends(get_db),
+    column: str = Query(..., description="sort on the basis of height weight or bmi"),
+    order: Optional[str] = Query(
+        "asc", description="default is asc mention desc otherwise"
+    ),
+    db: sqlite3.Connection = Depends(get_db),
 ):
     valid_fields = ["height", "weight", "bmi"]
     if column not in valid_fields:
