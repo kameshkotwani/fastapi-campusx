@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 # Define a Pydantic model for a patient
 class Patient(BaseModel):
     patient_id: str

@@ -1,6 +1,6 @@
 import sqlite3
 
-conn:sqlite3.Connection = sqlite3.connect("patients.db")
+conn: sqlite3.Connection = sqlite3.connect("patients.db")
 
 
 cursor = conn.cursor()
@@ -11,7 +11,6 @@ print("Column names:", column_names)
 rows = cursor.fetchall()
 result = {}
 for row in rows:
-    result[row[0]] = dict(zip(column_names,row))
+    result[row[0]] = dict(zip(column_names, row))
 
 print(result)
-
