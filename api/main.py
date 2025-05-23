@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from typing import Optional
 import sqlite3
+from api import Patient
 
 
 def get_db():
@@ -71,3 +72,27 @@ def sort_patients(
     for row in rows:
         result[row[0]] = dict(zip(column_names, row))
     return result
+
+
+@app.post("/create")
+def create_item(patient: Patient, db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.cursor()
+    cursor.execute("SELECT 1 FROM patients WHERE patient_id = ?", (patient.id,))
+    if cursor.fetchone():
+        raise HTTPException(
+            status_code=400, detail={"error": "Patient with this ID already exists"}
+        )
+    cursor.execute(
+        "INSERT INTO patients (patient_id, name, age, height, weight, bmi,verdict) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (
+            patient.id,
+            patient.name,
+            patient.age,
+            patient.height,
+            patient.weight,
+            patient.bmi,
+            patient.verdict,
+        ),
+    )
+    db.commit()
+    return {"message": "Patient created successfully", "patient_id": patient.id}

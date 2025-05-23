@@ -5,14 +5,14 @@ from pydantic import (
     AnyUrl,
     Field,
     field_validator,
-    model_validator,
     computed_field,
 )
-from typing import Optional, Annotated, Self
-from address import Address
+from typing import Optional, Annotated
+from api.address import Address
 
 
 class Patient(BaseModel):
+    id: Annotated[str, Field(description="Unique ID of the patient")]
     name: Annotated[
         str,
         Field(
@@ -34,8 +34,8 @@ class Patient(BaseModel):
         ),
     ]
     allergies: Annotated[Optional[list[str]], Field(default=None, max_length=5)]
-    contact_details: dict[str, str]
-    address: Address
+    contact_details: Annotated[Optional[dict[str, str]], Field(default=None)]
+    address: Annotated[Optional[Address], Field(default={})]
 
     # validator functions
     # so we should return the value are it is validated or any transformation is performed on it, otherwise it will be None
@@ -56,27 +56,27 @@ class Patient(BaseModel):
         """return name in title case"""
         return value.title()
 
-    # this validates the field before implicit type conversion
-    # @field_validator("age",mode='before')
-
-    # this validates the field after implicit type conversion
-    # @field_validator("age", mode="after")
-    # @classmethod
-    # def validate_age(cls, value: int) -> int:
-    #     """check age"""
-    #     if value < 100:
-    #         return value
-    #     else:
-    #         raise ValueError("Age cannot be greater than 100 or less than zero")
-
-    @model_validator(mode="after")
-    def validate_emergency_contact(self) -> Self:
-        if self.age > 60 and not self.contact_details.get("emergency_contact"):
-            raise ValueError("Emergency contact is required for patients above 60")
-        return self
+    # removing it for now
+    # @model_validator(mode="after")
+    # def validate_emergency_contact(self) -> Self:
+    #     if self.age > 60 and not self.contact_details.get("emergency_contact"):
+    #         raise ValueError("Emergency contact is required for patients above 60")
+    #     return self
 
     @computed_field
     @property
     def bmi(self) -> float:
         """calculate bmi"""
         return round(self.weight / (self.height**2), 2)
+
+    @computed_field
+    @property
+    def verdict(self) -> str:
+        if self.bmi < 18.5:
+            return "Underweight"
+        elif 18.5 <= self.bmi < 25:
+            return "Normal"
+        elif 25 <= self.bmi < 30:
+            return "Overweight"
+        else:
+            return "Obese"
